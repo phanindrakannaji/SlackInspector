@@ -1,2 +1,3 @@
 ./node_modules/
 ./slackinspector/node_modules/
+./webapp/angular-hackstart/node_modules/*

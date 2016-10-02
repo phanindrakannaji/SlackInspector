@@ -1,0 +1,36 @@
+
+<div *ngIf="report">
+    <h2 class="msgDetailsh2">Report : {{report.id}}</h2>
+    <div>
+        <span class="msgDetailsLabel">Sent By: </span>
+        <span id="msgDetailsUsername" class="msgDetailsP">{{report.username}}</span>
+    </div><br/>
+    <div>
+        <span class="msgDetailsLabel">Message: </span>
+    </div>
+    <div class="msgDetailsMessage"><textarea class="msgDetailsTextArea" readonly>{{report.msg}}</textarea></div><br/>
+    <div>
+        <span class="msgDetailsLabel">When: </span>
+        <span id="msgDetailsWhen" class="msgDetailsP">{{report.time}}</span>
+    </div><br/>
+    <div>
+        <span class="msgDetailsLabel">Where: </span>
+        <span id="msgDetailsWhere" class="msgDetailsP">{{report.channel}}</span>
+    </div><br/>
+    <div>
+        <span class="msgDetailsLabel">Reported By: </span>
+        <span id="msgDetailsUpvotes" class="msgDetailsP">{{report.upvotes}}</span>
+    </div><br/>
+    <div>
+        <span class="msgDetailsLabel">No Response From: </span>
+        <span id="msgDetailsDownvotes" class="msgDetailsP">{{report.downvotes}}</span>
+    </div><br/>
+   <div *ngIf="report.resolved==false" class="ResolveButtonDiv">
+       <button class="resolvebutton">Resolve</button>
+       <button  class= "backbutton" (click)="goBack()">Back</button>
+   </div>
+    <div *ngIf="report.resolved==true" class="ResolvedText">
+        <p>Resolved</p>
+        <button  class= "backbutton" (click)="goBack()">Back</button>
+    </div>
+</div>

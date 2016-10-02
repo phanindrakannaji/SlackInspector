@@ -1,0 +1,34 @@
+
+<table class="reports" style="width:100%">
+
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Message</th>
+        <th>When?</th>
+        <th>Channel</th>
+        <th>Reported By</th>
+        <th>Is resolved?</th>
+    </tr>
+
+    </thead>
+    <tbody>
+
+
+
+    <tr class="listhover" *ngFor="let report of reports"
+        (click)="gotoDetail(report)">
+        <td>{{report.username}}</td>
+        <td>{{report.msg.substring(0,75)}}...</td>
+        <td>{{report.time}}</td>
+        <td>{{report.channel}}</td>
+        <td>{{report.upvotes}}</td>
+        <td><div *ngIf="report.resolved"><img src="http://www.clipartkid.com/images/228/pic-correct-tick-clipart-best-XJQ308-clipart.png" style="width:20px; height: 20px"/> </div></td>
+
+    </tr>
+
+    </tbody>
+
+
+
+</table>

@@ -1,0 +1,72 @@
+span.msgDetailsLabel{
+    color: #333333;
+    font-size: 24px;
+    font-family: SansSerif;
+    width: 100px;
+    font-weight:bold;
+}
+
+span.msgDetailsP{
+    color: #444444;
+    font-size: 24px;
+    font-family: SansSerif;
+    width: 100px;
+}
+
+h2.msgDetailsh2{
+    color : black;
+    font-size: 36px;
+}
+
+div.msgDetailsMessage{
+    color: #555555;
+    font-size: 20px;
+}
+
+.msgDetailsTextArea{
+    width: 1000px;
+    height: 100px;
+    max-width: 1000px;
+    max-height: 100px;
+    resize: none;
+    color: #555555;
+    font-size: 16px;
+    font-family: Lucida Console, Monaco, monospace;
+    border-color: white;
+    padding-left:60px;
+    margin-top:20px;
+}
+
+.resolvebutton{
+    background-color: darkred;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-right:50px;
+}
+
+.ResolvedText{
+    color: green;
+    font-size: 34px;
+    font-family: Times New Roman, Times, serif;
+    font-weight: bolder;
+}
+
+.backbutton {
+    background-color: black;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
