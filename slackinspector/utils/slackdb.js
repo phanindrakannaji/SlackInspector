@@ -1,7 +1,11 @@
 var mongoose = require('mongoose');
 var fs = require('fs');
 module.exports = {};
+var slackdb_isntance = null;
 function getSlackDb(callback) {
+	if(slackdb_isntance != null){
+	   callback(slackdb_isntance);	
+	}
     debugger;
     var x = new slack_db(callback);
 
@@ -12,6 +16,7 @@ function getSlackDb(callback) {
         this.db = mongoose.connection;
         this.db.on('error', console.error.bind(console, 'connection error:'));
         this.db.once('open', function(){
+			    slackdb_isntance = scopeObj;
                 callback(scopeObj);
             });
         }
@@ -86,9 +91,21 @@ function getSlackDb(callback) {
                 return;
             })
         }
-        slack_db.prototype.updateReport = function(reportId, isOffensive, updateCallback) {
+        slack_db.prototype.updateReport = function(reportId, isOffensive, comupdateCallback) {
+			var user;
+			var message;
+			var scopeOObj = this;
+			function updateCallback(boool){
+				if(boool){
+				   scopeOObj.updateReportWords(message,user,comupdateCallback);	
+				}else{
+				   comupdateCallback(false);	
+				}
+			}
             var model = mongoose.model('reportids');
+			debugger;
             var scopeObj = this;
+			debugger;
             model.find({
                 "_id": reportId
             }, function(err, results) {
@@ -96,6 +113,7 @@ function getSlackDb(callback) {
                     //hoping the results will the array of json so coding this way
                     debugger;
                     results = results[0];
+					console.log(results);
                     var whoreport = results["whoreport"];
                     var messageid = results["messageid"];
                     var reportModel = mongoose.model('reports');
@@ -105,19 +123,23 @@ function getSlackDb(callback) {
                     }, function(err, result) {
                         debugger;
                         if (err) {
+							console.log("please tell u r the culprit"+err);
                             updateCallback(false);
                             return;
                         }
                         debugger;
                         result = result[0];
                         if (result) {
+							console.log("^^^^^^^ result 0000000 "+JSON.stringify(result));
                             var upvotesList = result["upvoteslist"];
                             var downvotesList = result["downvoteslist"];
+							user = result["user"];
+							message = result["message"]
                             if (isOffensive == true) {
                                 if (upvotesList) {
-                                    upvoteslist.push(whoreport);
+                                    upvotesList.push(whoreport);
                                 } else {
-                                    upvoteslist = [whoreport];
+                                    upvotesList = [whoreport];
                                 }
                             }
                             reportModel.update({
@@ -130,9 +152,11 @@ function getSlackDb(callback) {
                                     updateCallback(false);
                                     return;
                                 }
+								console.log("Might be here");
                                 updateCallback(true);
                             });
                         } else {
+							console.log("failed here");
                             updateCallback(false);
                         }
 
@@ -185,12 +209,14 @@ function getSlackDb(callback) {
                 debugger;
                 var reportedWordsSchema = mongoose.Schema({
                     name: String,
-                    count: String
+                    count: Number,
+					user: String
                 })
                 debugger;
                 scopeObj.reportedwords_schema = {
                     name: String,
-                    count: Number
+                    count: Number,
+					user: String
                 };
                 debugger;
                 mongoose.model('reportedwords', reportedWordsSchema);
@@ -200,7 +226,9 @@ function getSlackDb(callback) {
                     upvoteslist: [String],
                     downvoteslist: [String],
                     timestamp: String,
-                    username: String
+                    user: String,
+					resolved: String,
+					tags:[String]
                 });
                 debugger;
                 scopeObj.reports_schema = {
@@ -208,7 +236,9 @@ function getSlackDb(callback) {
                     upvoteslist: [String],
                     downvoteslist: [String],
                     timestamp: String,
-                    username: String
+                    user: String,
+					resolved: String,
+					tags:[String]
                 };
                 debugger;
                 mongoose.model('reports', reportsSchema);
@@ -221,7 +251,7 @@ function getSlackDb(callback) {
                 debugger;
                 var buffer = fs.readFileSync('../foul_words.txt');
                 var str = buffer.toString('utf8');
-                var badWords = str.split('\n');
+                var badWords = str.split('\r\n');
                 var badWords_model = mongoose.model('badwords');
                 var index = 0;
                 console.log("bad words length: " + badWords.length)
@@ -250,22 +280,26 @@ function getSlackDb(callback) {
             }
         }
 
-        slack_db.prototype.incReportWordCount = function(word, callback) {
+        slack_db.prototype.incReportWordCount = function(word,user,callback) {
             var scopeObj = this;
             this.isBadWord(word, function(boool) {
+				
                 if (boool == true) {
+					console.log("Its bad "+word);
                     var model = mongoose.model('reportedwords');
-                    model.count({
-                        name: word
+                    model.find({
+                        "$and":[{"name": word},{"user":user}]
                     }, function(err, result) {
                         if (err) {
                             callback(false);
                             return;
                         }
-                        if (result > 0) {
-                            result = result + 1;
+                        if (result.length > 0) {
+							result = result[0]["count"];
+                            result = Number(result) + 1;
+							console.log(word+"-->>"+result);
                             model.update({
-                                name: word
+                                 "$and":[{"name": word},{"user":user}]
                             }, {
                                 count: result
                             }, function(err, result) {
@@ -278,7 +312,8 @@ function getSlackDb(callback) {
                         } else {
                             var entry = new model({
                                 "name": word,
-                                count: 1
+								"user":user,
+                                "count": 1
                             });
                             entry.save(function(err, result) {
                                 if (err) {
@@ -289,24 +324,42 @@ function getSlackDb(callback) {
                             })
                         }
                     })
-                }
+                }else{
+					callback(true);
+					console.log("its not at all bad");
+				}
             })
         }
 
-        slack_db.prototype.updateReportWords = function(sentence, updatecallback) {
+        slack_db.prototype.updateReportWords = function(sentence,user,updatecallback) {
             words = sentence.replace(/[.,?!;()"'-]/g, " ").replace(/\s+/g, " ").toLowerCase().split(" ");
+			console.log("words are "+words.length);
             var index = 0;
+			var scopeObj = this;
+			recursive();
             function recursive(){
+				console.log("check.."+index);
                 if(index >= words.length){
-                    updatecallback();
+                    updatecallback(true);
                     return;
                 }
-                incReportWordCount(callback);
+                scopeObj.incReportWordCount(words[index],user,callback);
                 function callback(){
+					 console.log("please");
                     index++;
                     recursive();
                 }
             }
         }
+		slack_db.prototype.markAsResolved = function(message_id,callback){
+			var reportsModel = mongoose.model('reports');
+			reportsModel.update({"_id":message_id},{"resolved":"yes"},function(err,result){
+				if(err){
+				  callback(false);
+                  return;				  
+				}
+				callback(true);
+			});
+		}
     }
 module.exports["getSlackDb"] = getSlackDb;
