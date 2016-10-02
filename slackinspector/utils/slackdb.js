@@ -4,7 +4,8 @@ module.exports = {};
 var slackdb_isntance = null;
 function getSlackDb(callback) {
 	if(slackdb_isntance != null){
-	   callback(slackdb_isntance);	
+	   callback(slackdb_isntance);
+       return;	
 	}
     debugger;
     var x = new slack_db(callback);
@@ -361,5 +362,13 @@ function getSlackDb(callback) {
 				callback(true);
 			});
 		}
+
+        slack_db.prototype.getReports= function(callback){
+            var reportsModel = mongoose.model('reports');
+            reportsModel.find(succcessCallback);
+            function succcessCallback(err, data){
+                callback(data);
+            }
+        }
     }
 module.exports["getSlackDb"] = getSlackDb;
